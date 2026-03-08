@@ -17,7 +17,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useMemo, useEffect, useCallback } = React;
+    const { useState, useMemo, useEffect, useCallback, useRef } = React;
 
     const IconPlus = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
     const IconHome = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
@@ -35,43 +35,64 @@
     const IconChevronRight = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"></polyline></svg>;
     const IconTrash = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
     
+    // ✨ ไอคอนปุ่มย้อนกลับ/ถัดไป แบบลูกศรคู่
+    const IconChevronsLeft = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>;
+    const IconChevronsRight = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>;
+
     // ไอคอน Social Media (Facebook, Instagram, TikTok)
     const IconFacebook = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>;
     const IconInstagram = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>;
     const IconTikTok = ({size=24, className=""}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>;
 
-    // 🎨 บังคับใช้ 5 สีจากพาเลทเท่านั้น (Dark Mode)
-    const COLORS = {
-      blue: '#9C9874',       // Sage Meadow
-      pink: '#8D5F32',       // Buttered Toffee
-      purple: '#D9C89C',     // Warm Shortbread
-      orange: '#7A301A',     // Mulled Merlot
-      bg: '#3B2418',         // Barnwood Cocoa (เข้มสุดเป็นพื้นหลัง)
-      white: '#D9C89C',      // Warm Shortbread (สว่างสุดแทนสีขาว)
-      textMain: '#D9C89C',   // Warm Shortbread
-      textSoft: '#9C9874',   // Sage Meadow
-      pinkDeep: '#7A301A',   // Mulled Merlot
-      blueDeep: '#9C9874',   // Sage Meadow
-      purpleDeep: '#D9C89C', // Warm Shortbread
-      orangeDeep: '#D9C89C', // Warm Shortbread
-      cardBg: '#8D5F32',     // Buttered Toffee
-      cardBgDone: '#3B2418', // Barnwood Cocoa
+    // ✨ เอฟเฟกต์ดาววิงก์วาดด้วย SVG
+    const SparkleSvg = ({size=24, className="", style={}}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="#FFF1CA" className={className} style={{ filter: 'drop-shadow(0 0 2px rgba(255, 241, 202, 0.8))', ...style }}>
+        <path d="M12 0 C12 8 16 12 24 12 C16 12 12 16 12 24 C12 16 8 12 0 12 C8 12 12 8 12 0 Z" />
+      </svg>
+    );
 
-      cardWhite: '#8D5F32',       // Buttered Toffee
-      cardBorder: '#9C9874',      // Sage Meadow
-      cardInner: '#3B2418',       // Barnwood Cocoa
-      cloudWhite: '#7A301A',      // Mulled Merlot
-      modalBg: '#8D5F32',         // Buttered Toffee
-      navBarBg: '#8D5F32',        // Buttered Toffee
-      profileBorder: '#D9C89C',   // Warm Shortbread
-      buttonBg: '#3B2418',        // Barnwood Cocoa
-      dividerColor: '#9C9874',    // Sage Meadow
-      emptyStateBg: '#3B2418',    // Barnwood Cocoa
-      calendarBg: '#8D5F32',      // Buttered Toffee
-      searchInputBg: '#3B2418',   // Barnwood Cocoa
-      filterBarBg: '#3B2418',     // Barnwood Cocoa
-      bannerOverlayBg: '#3B2418', // Barnwood Cocoa
+    // 🎨 บังคับใช้ 5 สีจากพาเลทเท่านั้น
+    const COLORS = {
+      blue: '#FF9BC9',       
+      pink: '#FFD7E3',       
+      purple: '#FFF1CA',     
+      orange: '#FF9BC9',     
+      bg: '#F3528D',         // เข้มสุดเป็นพื้นหลัง
+      white: '#FFF1CA',      // สว่างสุดแทนสีขาว
+      textMain: '#F3528D',   
+      textSoft: '#FF9BC9',   
+      pinkDeep: '#FF9BC9',   
+      blueDeep: '#FF9BC9',   
+      purpleDeep: '#FFF1CA', 
+      orangeDeep: '#FFF1CA', 
+      cardBg: '#FFD7E3',     
+      cardBgDone: '#FF9BC9', 
+
+      cardWhite: '#FFD7E3',       
+      cardBorder: '#FF9BC9',      
+      cardInner: '#F3528D',       
+      cloudWhite: '#FF9BC9',      
+      modalBg: '#FF9BC9',         
+      navBarBg: '#F3528D',        
+      profileBorder: '#FFF1CA',   
+      buttonBg: '#F3528D',        
+      dividerColor: '#FF9BC9',    
+      emptyStateBg: '#F3528D',    
+      calendarBg: '#FFD7E3',      
+      searchInputBg: '#F3528D',   
+      filterBarBg: '#F3528D',     
+      bannerOverlayBg: '#F3528D', 
     };
+
+    // 📊 ระบบสถานะ 6 ขั้นตอน
+    const STATUS_STEPS = [
+      { id: 'todo', label: 'รอคิว', percent: 0 },
+      { id: 'doing', label: 'เริ่มปั้นงาน', percent: 20 },
+      { id: 'checking', label: 'เช็คงาน', percent: 40 },
+      { id: 'editing', label: 'แก้ไขตัวงาน', percent: 60 },
+      { id: 'baking', label: 'เริ่มอบ+เคลือบตัวงาน', percent: 80 },
+      { id: 'done', label: 'สำเร็จ', percent: 100 }
+    ];
 
     // 💨 COMPONENT: ริ้วควันไออุ่น (Soft Steam Wisps)
     const SteamWisp = React.memo(({ left, bottom, scale = 1, opacity = 0.5, delay = '0s', duration = '10s' }) => (
@@ -86,11 +107,46 @@
       </div>
     ));
 
+    // ✨ COMPONENT: เอฟเฟกต์กระพริบวิบวับ (Twinkling Sparkles Background)
+    const SparkleLayer = React.memo(() => {
+        const sparkles = useMemo(() => {
+            return Array.from({ length: 40 }).map((_, i) => ({
+                id: i,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                size: `${Math.random() * 3 + 1}px`,
+                delay: `${Math.random() * 5}s`,
+                duration: `${Math.random() * 3 + 2}s`,
+            }));
+        }, []);
+
+        return (
+            <div className="fixed inset-0 pointer-events-none z-1 overflow-hidden">
+                {sparkles.map(s => (
+                    <div 
+                        key={s.id}
+                        className="absolute rounded-full animate-twinkle opacity-0"
+                        style={{
+                            top: s.top,
+                            left: s.left,
+                            width: s.size,
+                            height: s.size,
+                            backgroundColor: COLORS.white,
+                            animationDelay: s.delay,
+                            animationDuration: s.duration,
+                            boxShadow: `0 0 ${parseInt(s.size) * 2}px ${COLORS.white}`,
+                        }}
+                    />
+                ))}
+            </div>
+        );
+    });
+
     const DynamicBackground = React.memo(() => (
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[-10%] w-72 h-72 rounded-full blur-[90px] opacity-30 animate-float" style={{ backgroundColor: '#7A301A' }}></div>
-        <div className="absolute bottom-[10%] right-[-10%] w-80 h-80 rounded-full blur-[100px] opacity-20 animate-float-reverse" style={{ backgroundColor: '#8D5F32' }}></div>
-        <div className="absolute top-[40%] right-[10%] w-48 h-48 rounded-full blur-[80px] opacity-10 animate-float" style={{ backgroundColor: '#D9C89C' }}></div>
+        <div className="absolute top-[10%] left-[-10%] w-72 h-72 rounded-full blur-[90px] opacity-30 animate-float" style={{ backgroundColor: '#FF9BC9' }}></div>
+        <div className="absolute bottom-[10%] right-[-10%] w-80 h-80 rounded-full blur-[100px] opacity-20 animate-float-reverse" style={{ backgroundColor: '#FFD7E3' }}></div>
+        <div className="absolute top-[40%] right-[10%] w-48 h-48 rounded-full blur-[80px] opacity-10 animate-float" style={{ backgroundColor: '#FFF1CA' }}></div>
         
         {/* Soft Steam Wisps (แทนที่ก้อนเมฆ) */}
         <SteamWisp left="15%" bottom="-5%" scale={1.5} opacity={0.25} delay="0s" duration="12s" />
@@ -102,28 +158,28 @@
 
     const Header = React.memo(({ isAdmin, setIsAdmin, setShowAuthModal, handleImageUpload, profileImage }) => (
       <div className="px-5 pt-6 pb-2 relative z-10">
-        <div className="backdrop-blur-md rounded-[32px] p-4 shadow-xl flex items-center justify-between h-20 relative overflow-hidden group" style={{ backgroundColor: `${COLORS.cardWhite}99`, borderWidth: '1px', borderColor: `${COLORS.cardBorder}`, shadowColor: 'rgba(59,36,24,0.4)' }}>
-          <div className="absolute left-6 top-1/2 -translate-y-1/2 w-24 h-8 blur-xl rounded-full" style={{ backgroundColor: '#7A301A', opacity: 0.4 }}></div>
+        <div className="backdrop-blur-md rounded-[32px] p-4 shadow-xl flex items-center justify-between h-20 relative overflow-hidden group" style={{ backgroundColor: '#FF9BC9', borderWidth: '1px', borderColor: '#FFF1CA', shadowColor: 'rgba(243,82,141,0.4)' }}>
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 w-24 h-8 blur-xl rounded-full" style={{ backgroundColor: '#FF9BC9', opacity: 0.4 }}></div>
           <div className="flex flex-col justify-center ml-2 relative z-10">
             <div className="flex items-center gap-1">
              <h1 className="text-2xl font-black italic tracking-tighter flex">
               {"bunnynap.co".split('').map((char, index) => (
                 <span 
                   key={index} 
-                  className={`bg-clip-text text-transparent drop-shadow-sm inline-block animate-text-wave pb-2 ${char === ' ' ? 'w-2.5' : 'pr-[1.5px]'}`} 
-                  style={{ backgroundImage: `linear-gradient(to bottom right, #D9C89C, #9C9874)`, animationDelay: `${index * 0.1}s` }}
+                  className={`drop-shadow-sm inline-block animate-text-wave pb-2 ${char === ' ' ? 'w-2.5' : 'pr-[1.5px]'}`} 
+                  style={{ color: '#FFF1CA', animationDelay: `${index * 0.1}s` }}
                 >
                   {char}
                 </span>
               ))}
             </h1>
-              <button onClick={() => isAdmin ? setIsAdmin(false) : setShowAuthModal(true)} className={`px-1.5 py-0.5 ml-1 rounded-full text-[7px] font-black uppercase tracking-widest border shadow-sm transition-all active:scale-95`} style={{ backgroundColor: isAdmin ? `${COLORS.buttonBg}99` : `${COLORS.buttonBg}cc`, color: isAdmin ? '#D9C89C' : '#9C9874', borderColor: '#9C9874' }}>
+              <button onClick={() => isAdmin ? setIsAdmin(false) : setShowAuthModal(true)} className={`px-1.5 py-0.5 ml-1 rounded-full text-[7px] font-black uppercase tracking-widest border shadow-sm transition-all active:scale-95`} style={{ backgroundColor: isAdmin ? `${COLORS.buttonBg}99` : `${COLORS.buttonBg}cc`, color: '#FFF1CA', borderColor: '#FFF1CA' }}>
                 {isAdmin ? 'Admin' : 'Guest'}
               </button>
             </div>
             <div className="flex items-center gap-1.5 opacity-80">
-              <div className="w-3 h-[1px]" style={{ backgroundColor: COLORS.white }}></div>
-              <p className="text-[8px] font-black tracking-[0.5em] uppercase" style={{ color: COLORS.blue }}>Check Q</p>
+              <div className="w-3 h-[1px]" style={{ backgroundColor: '#FFF1CA' }}></div>
+              <p className="text-[8px] font-black tracking-[0.5em] uppercase" style={{ color: '#FFF1CA' }}>Check Q</p>
             </div>
           </div>
           <div onClick={isAdmin ? handleImageUpload : undefined} className={`w-16 h-16 rounded-[1.25rem] flex items-center justify-center relative overflow-hidden transition-transform ${isAdmin ? 'cursor-pointer hover:scale-105 active:scale-95' : ''}`} style={{ backgroundColor: COLORS.cardInner, borderWidth: '2px', borderColor: COLORS.profileBorder }}>
@@ -131,7 +187,7 @@
               <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <>
-                <div className="absolute inset-0 opacity-40" style={{ background: `linear-gradient(to top right, #7A301A, #3B2418)` }}></div>
+                <div className="absolute inset-0 opacity-40" style={{ backgroundColor: COLORS.bg }}></div>
                 <span className="text-2xl relative z-10 select-none">🐻</span>
               </>
             )}
@@ -149,14 +205,14 @@
       });
 
       return (
-        <div onClick={triggerFlowerBounce} className={`backdrop-blur-sm rounded-[28px] p-3 flex flex-col items-center justify-center shadow-lg h-full relative overflow-hidden transition-all duration-300 cursor-pointer ${isBouncing ? 'scale-95' : 'hover:scale-[1.02]'}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderWidth: '1px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(59,36,24,0.4)' }}>
+        <div onClick={triggerFlowerBounce} className={`backdrop-blur-sm rounded-[28px] p-3 flex flex-col items-center justify-center shadow-lg h-full relative overflow-hidden transition-all duration-300 cursor-pointer ${isBouncing ? 'scale-95' : 'hover:scale-[1.02]'}`} style={{ backgroundColor: '#fff9e8', borderWidth: '1px', borderColor: '#FF9BC9', shadowColor: 'rgba(243,82,141,0.4)' }}>
           <div className="absolute top-2 left-3 text-[8px] font-black uppercase tracking-tighter opacity-70" style={{ color: COLORS.textMain }}>ความสำเร็จวันนี้</div>
           <div className="relative w-full h-20 flex items-center justify-center mt-2">
             {progress > 0 && (
               <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/4 w-1.5 h-1.5 rounded-full animate-float-particle-1 opacity-60" style={{ backgroundColor: '#D9C89C' }}></div>
-                  <div className="absolute top-2/3 right-1/4 w-2 h-2 rounded-full animate-float-particle-2 opacity-60" style={{ backgroundColor: '#9C9874' }}></div>
-                  <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 rounded-full animate-float-particle-3 opacity-60" style={{ backgroundColor: '#8D5F32' }}></div>
+                  <div className="absolute top-1/2 left-1/4 w-1.5 h-1.5 rounded-full animate-float-particle-1 opacity-60" style={{ backgroundColor: '#FFF1CA' }}></div>
+                  <div className="absolute top-2/3 right-1/4 w-2 h-2 rounded-full animate-float-particle-2 opacity-60" style={{ backgroundColor: '#FFD7E3' }}></div>
+                  <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 rounded-full animate-float-particle-3 opacity-60" style={{ backgroundColor: '#FF9BC9' }}></div>
               </div>
             )}
             <svg viewBox="0 0 100 100" className="w-20 h-20 overflow-visible">
@@ -165,16 +221,16 @@
                     <g transform={`scale(${bloomScale})`} className="transition-transform duration-1000 cubic-bezier(0.34, 1.56, 0.64, 1)">
                       <g transform="translate(-50, -50)">
                         {petals.map((p, i) => (
-                          <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill="#9C9874" opacity="0.95" className="transition-all duration-700"/>
+                          <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill="#FFD7E3" opacity="0.95" className="transition-all duration-700"/>
                         ))}
-                        <circle cx="50" cy="50" r="14" fill="#D9C89C" stroke="#3B2418" strokeWidth="1" className="transition-all duration-700" />
+                        <circle cx="50" cy="50" r="14" fill="#FFF1CA" stroke="#F3528D" strokeWidth="1" className="transition-all duration-700" />
                         {isFullBloom && (
                           <g transform="translate(50, 50)" className="animate-fade-in">
-                            <path d="M -5 -1 Q -3 -3 -1 -1" fill="none" stroke="#3B2418" strokeWidth="1.2" strokeLinecap="round" />
-                            <path d="M 1 -1 Q 3 -3 5 -1" fill="none" stroke="#3B2418" strokeWidth="1.2" strokeLinecap="round" />
-                            <path d="M -1.5 2 Q 0 4 1.5 2" fill="none" stroke="#3B2418" strokeWidth="1.2" strokeLinecap="round" />
-                            <ellipse cx="-6" cy="1" rx="1.5" ry="1" fill="#3B2418" opacity="0.6"/>
-                            <ellipse cx="6" cy="1" rx="1.5" ry="1" fill="#3B2418" opacity="0.6"/>
+                            <path d="M -5 -1 Q -3 -3 -1 -1" fill="none" stroke="#F3528D" strokeWidth="1.2" strokeLinecap="round" />
+                            <path d="M 1 -1 Q 3 -3 5 -1" fill="none" stroke="#F3528D" strokeWidth="1.2" strokeLinecap="round" />
+                            <path d="M -1.5 2 Q 0 4 1.5 2" fill="none" stroke="#F3528D" strokeWidth="1.2" strokeLinecap="round" />
+                            <ellipse cx="-6" cy="1" rx="1.5" ry="1" fill="#F3528D" opacity="0.6"/>
+                            <ellipse cx="6" cy="1" rx="1.5" ry="1" fill="#F3528D" opacity="0.6"/>
                           </g>
                         )}
                       </g>
@@ -185,24 +241,24 @@
           </div>
           <div className="mt-1 flex items-center gap-1 px-2 py-0.5 rounded-full z-10 border" style={{ backgroundColor: `${COLORS.buttonBg}99`, borderColor: COLORS.cardBorder }}>
             <span className="text-xs font-black" style={{ color: COLORS.white }}>{progress}%</span>
-            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#9C9874' }}></div>
-            <span className="text-[8px] font-bold uppercase" style={{ color: COLORS.blue }}>{doneToday} / {todayTasksLength} งาน</span>
+            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#FFD7E3' }}></div>
+            <span className="text-[8px] font-bold uppercase" style={{ color: COLORS.white }}>{doneToday} / {todayTasksLength} งาน</span>
           </div>
         </div>
       );
     });
 
     const CompactStats = React.memo(({ isAdmin, selectedNextDate, nextQueueDate, handleSetManualDate, waitingCount }) => (
-      <div className="backdrop-blur-sm rounded-[28px] p-1 shadow-lg h-full flex overflow-hidden relative group transition-all" style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderWidth: '1px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(59,36,24,0.4)' }}>
-          <div className={`flex-1 flex flex-col justify-center items-center p-2 relative rounded-l-[24px] transition-colors overflow-hidden ${isAdmin ? 'cursor-pointer' : ''}`} style={{ backgroundColor: `${COLORS.orange}66` }}>
+      <div className="backdrop-blur-sm rounded-[28px] p-1 h-full flex relative group transition-all shadow-sm" style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderWidth: '2px', borderColor: '#FFF1CA' }}>
+          <div className={`flex-1 flex flex-col justify-center items-center p-2 relative rounded-l-[24px] transition-colors overflow-hidden ${isAdmin ? 'cursor-pointer' : ''}`} style={{ backgroundColor: '#FFD7E3' }}>
             {isAdmin && (
               <input type="date" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" value={selectedNextDate || nextQueueDate} onChange={(e) => handleSetManualDate(e.target.value)} />
             )}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[7px] font-black shadow-sm border uppercase tracking-wider whitespace-nowrap" style={{ color: COLORS.white, backgroundColor: COLORS.buttonBg, borderColor: COLORS.cardBorder }}>NEXT QUEUE</div>
             
             <div className="flex flex-col items-center mt-1 relative z-0 pointer-events-none">
-              <span className="text-3xl font-black leading-none tracking-tighter" style={{ color: COLORS.white }}>{new Date(nextQueueDate).getDate()}</span>
-              <span className="text-[8px] font-black opacity-80 uppercase mt-0.5" style={{ color: COLORS.white }}>{new Date(nextQueueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+              <span className="text-3xl font-black leading-none tracking-tighter" style={{ color: COLORS.textMain }}>{new Date(nextQueueDate).getDate()}</span>
+              <span className="text-[8px] font-black opacity-80 uppercase mt-0.5" style={{ color: COLORS.textMain }}>{new Date(nextQueueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
             </div>
 
             {isAdmin && selectedNextDate && (
@@ -217,90 +273,123 @@
             )}
           </div>
 
-          <div className="my-4 rounded-full" style={{ width: '1px', backgroundColor: `${COLORS.dividerColor}99` }}></div>
+          <div className="my-4 rounded-full z-10" style={{ width: '1px', backgroundColor: `${COLORS.dividerColor}99` }}></div>
           
-          <div className="flex-1 flex flex-col justify-center items-center p-2 relative">
+          <div className="flex-1 flex flex-col justify-center items-center p-2 relative rounded-r-[24px] overflow-hidden" style={{ backgroundColor: '#FFF1CA' }}>
             <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-md text-[7px] font-black shadow-sm border uppercase tracking-wider whitespace-nowrap z-10" style={{ color: COLORS.white, backgroundColor: COLORS.buttonBg, borderColor: COLORS.cardBorder }}>จำนวนคิวก่อนหน้า</div>
             
             <div className="relative mt-5 flex flex-col items-center">
                <div className="relative">
                  <div className="absolute inset-0 blur-lg rounded-full opacity-40 scale-125" style={{ backgroundColor: COLORS.blue }}></div>
-                 <div className="w-11 h-11 rounded-full flex flex-col items-center justify-center shadow-[inset_0_2px_8px_rgba(59,36,24,0.5)] relative z-10" style={{ backgroundColor: COLORS.cardInner, borderWidth: '2px', borderColor: COLORS.blue }}>
+                 <div className="w-11 h-11 rounded-full flex flex-col items-center justify-center shadow-[inset_0_2px_8px_rgba(243,82,141,0.5)] relative z-10" style={{ backgroundColor: COLORS.cardInner, borderWidth: '2px', borderColor: COLORS.blue }}>
                     <span className="text-xl font-black leading-none" style={{ color: COLORS.white }}>{waitingCount}</span>
                  </div>
                </div>
-               <span className="text-[8px] font-black opacity-60 uppercase mt-1.5 relative z-10" style={{ color: COLORS.white }}>คิว</span>
+               <span className="text-[8px] font-black opacity-60 uppercase mt-1.5 relative z-10" style={{ color: COLORS.textMain }}>คิว</span>
             </div>
           </div>
       </div>
     ));
 
-    const TaskCard = React.memo(({ task, isAdmin, onEdit, onToggleDoing, onToggleStatus }) => (
-      <div onClick={() => isAdmin && onEdit(task)} className={`relative mb-2 rounded-[22px] p-3 transition-all shadow-sm group backdrop-blur-sm ${isAdmin ? 'active:scale-[0.97] cursor-pointer' : ''}`} 
-        style={{ 
-          backgroundColor: task.status === 'done' ? COLORS.cardBgDone : task.status === 'doing' ? COLORS.orange : COLORS.cardBg,
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor: task.status === 'doing' ? COLORS.white : (task.status === 'done' ? 'transparent' : COLORS.cardBorder), 
-          opacity: task.status === 'done' ? 0.7 : 1 
-        }}
-        >
-        {task.status === 'doing' && (
-           <div className="absolute inset-0 pointer-events-none z-0">
-             <div className="absolute -bottom-2 -left-3 text-[14px] animate-float-particle-1 drop-shadow-sm">🧸</div>
-             <div className="absolute top-[30%] -left-4 text-[10px] animate-float-particle-3 drop-shadow-sm" style={{ animationDelay: '1.5s' }}>🧸</div>
-             <div className="absolute -bottom-2 -right-3 text-[14px] animate-float-particle-2 drop-shadow-sm" style={{ animationDelay: '0.5s' }}>🧸</div>
-             <div className="absolute top-[30%] -right-4 text-[10px] animate-float-particle-1 drop-shadow-sm" style={{ animationDelay: '1.2s' }}>🧸</div>
-           </div>
-        )}
-        <div className="absolute left-2 top-3 bottom-3 w-1 rounded-full shadow-sm z-10" style={{ backgroundColor: task.channel === 'LINE' ? '#9C9874' : task.channel === 'FB' || task.channel === 'FACEBOOK' ? '#8D5F32' : task.channel === 'IG' ? '#7A301A' : COLORS.purpleDeep }}></div>
-        <div className="pl-3 pr-1 relative z-10">
-          <div className="flex justify-between items-start mb-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-bold text-base truncate" style={{ color: COLORS.textMain }}>{task.client}</span>
-              <span className={`text-[7px] px-1.5 py-0.5 rounded-md font-black uppercase border`} style={{
-                color: '#D9C89C',
-                backgroundColor: task.channel === 'LINE' ? '#9C9874' : task.channel === 'FB' || task.channel === 'FACEBOOK' ? '#8D5F32' : task.channel === 'IG' ? '#7A301A' : '#3B2418',
-                borderColor: '#D9C89C'
-              }}>{task.channel}</span>
-              {task.priority === 'urgent' && <span className="text-[9px] font-bold animate-pulse px-2 py-0.5 rounded-full shadow-sm" style={{ color: COLORS.white, backgroundColor: COLORS.orange, border: `1px solid ${COLORS.white}` }}>{'\u{1F525}'} ด่วน</span>}
+    const TaskCard = React.memo(({ task, isAdmin, onEdit, onChangeStatus }) => {
+      // คำนวณหาลำดับขั้นตอนปัจจุบันตาม 6 สถานะ
+      const currentStepIndex = STATUS_STEPS.findIndex(s => s.id === task.status) !== -1 ? STATUS_STEPS.findIndex(s => s.id === task.status) : 0;
+      const currentStep = STATUS_STEPS[currentStepIndex];
+      const isDone = currentStep.percent === 100;
+      const isWorking = currentStep.percent > 0 && currentStep.percent < 100;
+
+      return (
+        <div onClick={() => isAdmin && onEdit(task)} className={`relative mb-2 rounded-[22px] p-3 transition-all shadow-sm group backdrop-blur-sm ${isAdmin ? 'active:scale-[0.97] cursor-pointer' : ''}`} 
+          style={{ 
+            backgroundColor: isDone ? COLORS.cardBgDone : '#FF9BC9',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: isDone ? 'transparent' : '#FFF1CA', 
+            opacity: isDone ? 0.7 : 1 
+          }}
+          >
+          {isWorking && (
+             <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[22px]">
+               <div className="absolute -bottom-2 -left-3 text-[14px] animate-float-particle-1 drop-shadow-sm">🧸</div>
+               <div className="absolute top-[30%] -left-4 text-[10px] animate-float-particle-3 drop-shadow-sm" style={{ animationDelay: '1.5s' }}>🧸</div>
+               <div className="absolute -bottom-2 -right-3 text-[14px] animate-float-particle-2 drop-shadow-sm" style={{ animationDelay: '0.5s' }}>🧸</div>
+               <div className="absolute top-[30%] -right-4 text-[10px] animate-float-particle-1 drop-shadow-sm" style={{ animationDelay: '1.2s' }}>🧸</div>
+             </div>
+          )}
+          <div className="absolute left-2 top-3 bottom-3 w-1 rounded-full shadow-sm z-10" style={{ backgroundColor: isDone ? '#F3528D' : '#FFD7E3' }}></div>
+          <div className="pl-3 pr-1 relative z-10">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-bold text-base truncate" style={{ color: isDone ? COLORS.textMain : '#FFF1CA' }}>{task.client}</span>
+                <span className={`text-[7px] px-1.5 py-0.5 rounded-md font-black uppercase border`} style={{
+                  color: isDone ? COLORS.bg : COLORS.textMain,
+                  backgroundColor: task.channel === 'LINE' ? '#FFF1CA' : task.channel === 'FB' || task.channel === 'FACEBOOK' ? '#FFD7E3' : task.channel === 'IG' ? '#FF9BC9' : '#FFF1CA',
+                  borderColor: isDone ? COLORS.bg : COLORS.textMain
+                }}>{task.channel}</span>
+                {task.priority === 'urgent' && <span className="text-[9px] font-bold animate-pulse px-2 py-0.5 rounded-full shadow-sm" style={{ color: COLORS.white, backgroundColor: COLORS.orange, border: `1px solid ${COLORS.white}` }}>{'\u{1F525}'} ด่วน</span>}
+              </div>
+              <div className="flex items-center gap-1 text-[9px] font-black px-2.5 py-0.5 rounded-lg border shadow-sm" style={{ color: isDone ? COLORS.white : '#FFF1CA', backgroundColor: isDone ? COLORS.bg : '#F3528D', borderColor: isDone ? COLORS.cardBorder : '#FFF1CA' }}>
+                  <IconCalendar size={11} style={{ color: isDone ? COLORS.white : '#FFF1CA' }} />
+                  {new Date(task.deadline).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-[9px] font-black px-2.5 py-0.5 rounded-lg border shadow-sm" style={{ color: COLORS.white, backgroundColor: COLORS.bg, borderColor: COLORS.cardBorder }}>
-                <IconCalendar size={11} style={{ color: COLORS.white }} />
-                {new Date(task.deadline).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit' })}
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-end mt-1">
-            <div className="flex-1 min-w-0 mr-4 flex flex-col">
-              <span className={`text-[10px] font-bold truncate`} style={{ color: task.status === 'done' ? '#9C9874' : '#D9C89C', textDecoration: task.status === 'done' ? 'line-through' : 'none' }}>{task.type}</span>
+            
+            {/* รวมประเภทงานและรายละเอียดไว้บรรทัดเดียวกัน */}
+            <div className="w-full mt-1.5 truncate">
+              <span className={`text-[12px] font-bold`} style={{ color: isDone ? '#F3528D' : '#FFF1CA', opacity: isDone ? 0.6 : 1, textDecoration: isDone ? 'line-through' : 'none' }}>{task.type}</span>
               {task.details && (
-                <span className={`text-[11px] font-medium truncate mt-0.5`} style={{ color: task.status === 'done' ? '#9C9874' : '#D9C89C' }}>{task.details}</span>
+                <span className={`text-[11px] font-medium ml-1`} style={{ color: isDone ? '#F3528D' : '#FFF1CA', opacity: isDone ? 0.6 : 0.9 }}>({task.details})</span>
               )}
             </div>
 
-            {isAdmin ? (
-              <div className="flex gap-1.5">
-                <button onClick={(e) => onToggleDoing(e, task.id)} className={`relative w-[28px] h-[28px] rounded-[8px] flex items-center justify-center transition-all active:scale-90 shadow-[0_3px_10px_rgba(59,36,24,0.4)]`} style={{ color: task.status === 'doing' ? COLORS.white : COLORS.white, backgroundColor: task.status === 'doing' ? COLORS.orange : COLORS.bg, borderWidth: '2px', borderColor: `${COLORS.cardBorder}` }}>
-                  <div className={`${task.status === 'doing' ? 'animate-spin-slow' : ''} flex items-center justify-center`}>
-                    <IconLoader size={14} />
+            {/* 📊 ส่วนแสดงหลอด Progress Bar และปุ่มควบคุม */}
+            <div className="mt-2 w-full">
+              <span className="text-[10px] font-black block mb-1" style={{ color: isDone ? '#F3528D' : '#FFF1CA', opacity: isDone ? 0.8 : 1 }}>{currentStep.label}</span>
+              
+              <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                      {/* หลอด Progress (ตัดขอบล้น) */}
+                      <div className="h-[15px] rounded-full overflow-hidden relative shadow-sm" style={{ backgroundColor: isDone ? '#FFD7E3' : '#F3528D', border: `2px solid ${isDone ? '#F3528D' : '#FFF1CA'}`, boxShadow: `0 0 6px ${isDone ? 'transparent' : '#FFF1CA'}` }}>
+                          {/* เอฟเฟกต์น้ำวิ่งระยิบระยับ ปรับความกว้างขั้นต่ำ */}
+                          <div className={`h-full transition-all duration-700 ease-out rounded-full relative ${isWorking ? 'water-effect' : ''}`} 
+                               style={{ width: `${Math.max(8, currentStep.percent)}%`, backgroundColor: isDone ? '#F3528D' : '#FFF1CA' }}>
+                          </div>
+                      </div>
+                      
+                      {/* 🐇 เลเยอร์พิเศษสำหรับกระต่ายวิ่งและดาววิงก์วาดใหม่ (ไม่โดนขอบหลอดตัด ขนาด 24px) */}
+                      <div className="absolute top-1/2 -translate-y-1/2 transition-all duration-700 ease-out z-50 flex items-center justify-center pointer-events-none"
+                           style={{ left: `calc(${Math.max(8, currentStep.percent)}% - 12px)` }}>
+                          <div className="relative flex items-center justify-center">
+                              {/* ✨ ดาววิงก์แบบวาด SVG */}
+                              <SparkleSvg size="14" className="absolute -top-3 -left-3 animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.1s' }} />
+                              <SparkleSvg size="10" className="absolute top-4 -right-1 animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.4s' }} />
+                              <SparkleSvg size="12" className="absolute -top-1 -right-4 animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.7s' }} />
+                              
+                              {/* 🐇 ตัวกระต่ายวิ่งดุ๊กดิ๊ก ขนาด 24px พอดี */}
+                              <div className="animate-bunny-run flex items-center justify-center drop-shadow-md" style={{ width: '24px', height: '24px', fontSize: '24px', lineHeight: '1' }}>
+                                🐇
+                              </div>
+                          </div>
+                      </div>
                   </div>
-                </button>
-                <button onClick={(e) => onToggleStatus(e, task.id)} className={`relative w-[28px] h-[28px] rounded-[8px] flex items-center justify-center transition-all active:scale-90 shadow-[0_3px_10px_rgba(59,36,24,0.4)]`} style={{ color: task.status === 'done' ? COLORS.white : COLORS.white, backgroundColor: task.status === 'done' ? COLORS.bg : COLORS.bg, borderWidth: '2px', borderColor: `${COLORS.cardBorder}` }}>
-                  <IconCheck size={16} />
-                </button>
+                  
+                  {isAdmin && (
+                      <div className="flex gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <button onClick={(e) => onChangeStatus(e, task.id, -1)} disabled={currentStepIndex <= 0} className={`w-[28px] h-[28px] rounded-[10px] flex items-center justify-center transition-all shadow-sm border ${currentStepIndex <= 0 ? 'opacity-40 cursor-not-allowed' : 'active:scale-95 hover:bg-[#fff9e8]'}`} style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: '#FFD7E3', borderWidth: '1.5px' }}>
+                              <IconChevronsLeft size={16} />
+                          </button>
+                          <button onClick={(e) => onChangeStatus(e, task.id, 1)} disabled={currentStepIndex >= STATUS_STEPS.length - 1} className={`w-[28px] h-[28px] rounded-[10px] flex items-center justify-center transition-all shadow-sm border ${currentStepIndex >= STATUS_STEPS.length - 1 ? 'opacity-40 cursor-not-allowed' : 'active:scale-95 hover:bg-[#fff9e8]'}`} style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: '#FFD7E3', borderWidth: '1.5px' }}>
+                              <IconChevronsRight size={16} />
+                          </button>
+                      </div>
+                  )}
               </div>
-            ) : (
-              <div className="flex items-center">
-                {task.status === 'doing' && <span className="text-[10px] font-bold flex items-center gap-1 px-2 py-1 rounded-md border shadow-sm" style={{ color: COLORS.white, backgroundColor: COLORS.orange, borderColor: COLORS.white }}><IconLoader size={10} className="animate-spin-slow"/> กำลังทำ</span>}
-                {task.status === 'done' && <span className="text-[10px] font-bold flex items-center gap-1 px-2 py-1 rounded-md border shadow-sm" style={{ color: COLORS.blue, backgroundColor: COLORS.bg, borderColor: COLORS.blue }}><IconCheck size={10} /> เสร็จแล้ว</span>}
-                {task.status === 'todo' && <span className="text-[10px] font-bold flex items-center gap-1 px-2 py-1 rounded-md border shadow-sm" style={{ color: COLORS.white, backgroundColor: COLORS.bg, borderColor: COLORS.cardBorder }}><IconClock size={10} /> รอคิว</span>}
-              </div>
-            )}
+            </div>
+
           </div>
         </div>
-      </div>
-    ));
+      );
+    });
 
     const CalendarView = React.memo(({ currentMonth, setCurrentMonth, selectedDate, setSelectedDate, today, tasks }) => {
       const year = currentMonth.getFullYear();
@@ -315,16 +404,16 @@
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
       return (
-        <div className="backdrop-blur-xl rounded-[32px] p-5 shadow-[0_12px_30px_rgba(59,36,24,0.5)] mb-5 animate-fadeIn" style={{ backgroundColor: `${COLORS.calendarBg}e6`, borderWidth: '4px', borderColor: COLORS.cardBorder }}>
+        <div className="backdrop-blur-xl rounded-[32px] p-5 shadow-[0_12px_30px_rgba(243,82,141,0.5)] mb-5 animate-fadeIn" style={{ backgroundColor: `${COLORS.calendarBg}e6`, borderWidth: '4px', borderColor: COLORS.cardBorder }}>
           <div className="flex justify-between items-center mb-4 px-2">
-            <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="p-1.5 rounded-full transition-colors" style={{ color: COLORS.white }}><IconChevronLeft size={20}/></button>
-            <h3 className="font-black text-[16px] tracking-widest" style={{ color: COLORS.white }}>{monthNames[month]} {year}</h3>
-            <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="p-1.5 rounded-full transition-colors" style={{ color: COLORS.white }}><IconChevronRight size={20}/></button>
+            <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="p-1.5 rounded-full transition-colors" style={{ color: COLORS.textMain }}><IconChevronLeft size={20}/></button>
+            <h3 className="font-black text-[16px] tracking-widest" style={{ color: COLORS.textMain }}>{monthNames[month]} {year}</h3>
+            <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="p-1.5 rounded-full transition-colors" style={{ color: COLORS.textMain }}><IconChevronRight size={20}/></button>
           </div>
           
           <div className="grid grid-cols-7 gap-1 text-center mb-3">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-[9px] font-black opacity-60 uppercase" style={{ color: COLORS.blue }}>{d}</div>
+              <div key={d} className="text-[9px] font-black opacity-60 uppercase" style={{ color: COLORS.textMain }}>{d}</div>
             ))}
           </div>
           
@@ -344,7 +433,7 @@
                     className={`relative w-10 h-10 flex flex-col items-center justify-center cursor-pointer transition-all rounded-full`}
                     style={{
                       backgroundColor: isSelected ? COLORS.orange : (isToday ? COLORS.bg : 'transparent'),
-                      color: isSelected ? COLORS.white : (isToday ? COLORS.white : COLORS.blue),
+                      color: isSelected ? COLORS.white : (isToday ? COLORS.white : COLORS.textMain),
                       borderWidth: isToday && !isSelected ? '2px' : '0px',
                       borderColor: COLORS.cardBorder,
                       fontWeight: isSelected || isToday ? '900' : '700'
@@ -352,7 +441,7 @@
                   >
                     <span className="text-[13px] z-10 leading-none">{day}</span>
                     {hasTasks && (
-                      <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isSelected ? COLORS.white : COLORS.blue }}></div> 
+                      <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isSelected ? COLORS.white : COLORS.bg }}></div> 
                     )}
                   </div>
                 </div>
@@ -364,6 +453,7 @@
     });
 
     function App() {
+      const appRef = useRef(null);
       const [tasks, setTasks] = useState([]);
       const [taskTypes, setTaskTypes] = useState(['Logo', 'Banner', 'Artwork']); 
       const [channels, setChannels] = useState(['LINE', 'FB', 'IG']); 
@@ -409,6 +499,10 @@
       const [showSocialModal, setShowSocialModal] = useState(false);
       const [tempSocialLinks, setTempSocialLinks] = useState({ facebook: '', instagram: '', tiktok: '' });
 
+      // 👆 ตัวแปรสำหรับ Interactive Click Trail
+      const [clickTrails, setClickTrails] = useState([]);
+
+      // ⚠️⚠️⚠️ อย่าลืมเปลี่ยนเป็นลิงก์ Web App ของคุณ ⚠️⚠️⚠️
       const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzsVe5DeqGr2vtYlv30DrbyCY2C78L494yA9gsfiSi1rnMRrBabK7MiHhdv1bdlp65DTg/exec";
 
       const fetchAPI = async (payload) => {
@@ -426,7 +520,7 @@
       };
 
       useEffect(() => {
-        document.title = "bunnynap.con"; 
+        document.title = "bunnynap.co"; 
         
         fetch(WEB_APP_URL + "?action=getInitialData")
           .then(res => res.json())
@@ -515,28 +609,25 @@
 
       const waitingCount = useMemo(() => tasks.filter(t => t.status !== 'done').length, [tasks]);
 
-      const toggleStatus = useCallback((e, id) => {
+      // 🔄 ฟังก์ชันเลื่อนสถานะตามลำดับขั้น (ย้อนกลับ/ถัดไป)
+      const changeTaskStatus = useCallback((e, id, direction) => {
         e.stopPropagation();
         setTasks(prev => {
           return prev.map(t => {
             if (t.id === id) {
-              const newStatus = t.status === 'done' ? 'todo' : 'done';
-              fetchAPI({ action: 'updateTaskStatus', taskId: id, newStatus: newStatus });
-              return { ...t, status: newStatus };
-            }
-            return t;
-          });
-        });
-      }, []);
-
-      const toggleDoing = useCallback((e, id) => {
-        e.stopPropagation();
-        setTasks(prev => {
-          return prev.map(t => {
-            if (t.id === id) {
-              const newStatus = t.status === 'doing' ? 'todo' : 'doing';
-              fetchAPI({ action: 'updateTaskStatus', taskId: id, newStatus: newStatus });
-              return { ...t, status: newStatus };
+              let currentIndex = STATUS_STEPS.findIndex(s => s.id === t.status);
+              if (currentIndex === -1) currentIndex = 0;
+              
+              let newIndex = currentIndex + direction;
+              if (newIndex < 0) newIndex = 0;
+              if (newIndex >= STATUS_STEPS.length) newIndex = STATUS_STEPS.length - 1;
+              
+              const newStatus = STATUS_STEPS[newIndex].id;
+              
+              if (newStatus !== t.status) {
+                  fetchAPI({ action: 'updateTaskStatus', taskId: id, newStatus: newStatus });
+                  return { ...t, status: newStatus };
+              }
             }
             return t;
           });
@@ -561,6 +652,7 @@
           priority: formData.get('priority') ? 'urgent' : 'normal', 
           deadline: formData.get('deadline'),
           details: formData.get('details'),
+          status: formData.get('status') || (editingTask ? editingTask.status : 'todo'),
         };
 
         fetchAPI({ action: 'saveOrUpdateTask', task: taskData })
@@ -602,6 +694,21 @@
         ? filteredAllTasks.filter(t => t.deadline === selectedDate) 
         : filteredAllTasks;
 
+      // 👆 ฟังก์ชันจัดการ Click Trail
+      const handleAppClick = useCallback((e) => {
+          const rect = appRef.current.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const id = Date.now();
+          
+          setClickTrails(prev => [...prev, { id, x, y }]);
+          
+          // ลบเอฟเฟกต์ออกหลังจากอนิเมชั่นจบ (500ms)
+          setTimeout(() => {
+              setClickTrails(prev => prev.filter(trail => trail.id !== id));
+          }, 500);
+      }, []);
+
       if (isLoading) {
         return (
           <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden" style={{ backgroundColor: COLORS.bg }}>
@@ -621,8 +728,27 @@
       }
 
       return (
-        <div className="min-h-screen font-sans relative" style={{ backgroundColor: COLORS.bg, color: COLORS.textMain }}>
+        <div ref={appRef} onClick={handleAppClick} className="min-h-screen font-sans relative overflow-x-hidden" style={{ backgroundColor: COLORS.bg, color: COLORS.textMain }}>
           <DynamicBackground />
+          <SparkleLayer /> {/* ✨ วิบวับพื้นหลัง */}
+          
+          {/* 👆 คลิกตอบสนอง */}
+          {clickTrails.map(trail => (
+              <div 
+                  key={trail.id}
+                  className="fixed rounded-full pointer-events-none animate-clickRipple opacity-0 z-[100]"
+                  style={{
+                      left: `${trail.x}px`,
+                      top: `${trail.y}px`,
+                      width: '20px',
+                      height: '20px',
+                      transform: 'translate(-50%, -50%)',
+                      border: `2px solid ${COLORS.pinkDeep}`,
+                      backgroundColor: `${COLORS.pinkDeep}33`,
+                  }}
+              />
+          ))}
+
           <div className="max-w-md mx-auto min-h-screen relative pb-28">
             <Header isAdmin={isAdmin} setIsAdmin={setIsAdmin} setShowAuthModal={setShowAuthModal} handleImageUpload={handleImageUpload} profileImage={profileImage} />
             
@@ -648,7 +774,7 @@
 
                {bannerImage && !isBannerVisible && isAdmin && (
                  <div className="flex justify-end mb-1">
-                    <button onClick={() => toggleBannerVisibility(true)} className="text-[10px] font-bold flex items-center gap-1 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-colors" style={{ color: COLORS.white, backgroundColor: `${COLORS.buttonBg}99`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
+                    <button onClick={() => toggleBannerVisibility(true)} className="text-[10px] font-bold flex items-center gap-1 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-colors" style={{ color: COLORS.textMain, backgroundColor: `${COLORS.buttonBg}99`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
                        <IconEye size={12} /> แสดงแบนเนอร์
                     </button>
                  </div>
@@ -656,7 +782,7 @@
 
                {!bannerImage && isAdmin && (
                  <div onClick={() => setShowBannerModal(true)} className="w-full h-16 rounded-[24px] border-[3px] border-dashed backdrop-blur-sm flex items-center justify-center cursor-pointer transition-colors" style={{ borderColor: COLORS.cardBorder, backgroundColor: `${COLORS.cardWhite}66` }}>
-                    <span className="text-[11px] font-bold flex items-center gap-2" style={{ color: COLORS.white }}><IconPlus size={16}/> เพิ่มรูปแบนเนอร์ร้าน</span>
+                    <span className="text-[11px] font-bold flex items-center gap-2" style={{ color: COLORS.textMain }}><IconPlus size={16}/> เพิ่มรูปแบนเนอร์ร้าน</span>
                  </div>
                )}
             </div>
@@ -687,7 +813,7 @@
                     </div>
                     <div className="flex gap-2">
                       {/* Note Input */}
-                      <div className="flex-1 backdrop-blur-sm rounded-[20px] px-4 py-0 shadow-sm flex items-center border" style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: COLORS.cardBorder }}>
+                      <div className="flex-1 backdrop-blur-sm rounded-[20px] px-4 py-0 shadow-sm flex items-center border" style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: '#FFF1CA' }}>
                         <input 
                           type="text" 
                           value={dashboardNote}
@@ -695,19 +821,19 @@
                           onBlur={handleNoteBlur}
                           readOnly={!isAdmin}
                           placeholder={isAdmin ? "เพิ่มโน้ตที่นี่ (บันทึกอัตโนมัติเมื่อกดออก)" : "ไม่มีโน้ตเพิ่มเติม"}
-                          className="w-full bg-transparent outline-none text-[11px] font-bold placeholder:text-[#9C9874]" 
-                          style={{ color: COLORS.white }} 
+                          className="w-full bg-transparent outline-none text-[11px] font-bold placeholder:text-[#FF9BC9]" 
+                          style={{ color: COLORS.textMain }} 
                         />
                       </div>
                       {/* Social Buttons */}
                       <div className="flex gap-1.5 shrink-0">
-                        <button onClick={() => socialLinks.facebook && window.open(socialLinks.facebook, '_blank')} className={`w-11 h-11 backdrop-blur-sm rounded-[16px] flex items-center justify-center shadow-sm border transition-transform hover:scale-105 active:scale-95 ${!socialLinks.facebook ? 'opacity-30 cursor-not-allowed' : ''}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: COLORS.cardBorder, color: COLORS.white }}>
+                        <button onClick={() => socialLinks.facebook && window.open(socialLinks.facebook, '_blank')} className={`w-11 h-11 backdrop-blur-sm rounded-[16px] flex items-center justify-center shadow-sm border transition-transform hover:scale-105 active:scale-95 ${!socialLinks.facebook ? 'opacity-30 cursor-not-allowed' : ''}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: '#FFF1CA', color: COLORS.textMain }}>
                           <IconFacebook size={20} />
                         </button>
-                        <button onClick={() => socialLinks.instagram && window.open(socialLinks.instagram, '_blank')} className={`w-11 h-11 backdrop-blur-sm rounded-[16px] flex items-center justify-center shadow-sm border transition-transform hover:scale-105 active:scale-95 ${!socialLinks.instagram ? 'opacity-30 cursor-not-allowed' : ''}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: COLORS.cardBorder, color: COLORS.white }}>
+                        <button onClick={() => socialLinks.instagram && window.open(socialLinks.instagram, '_blank')} className={`w-11 h-11 backdrop-blur-sm rounded-[16px] flex items-center justify-center shadow-sm border transition-transform hover:scale-105 active:scale-95 ${!socialLinks.instagram ? 'opacity-30 cursor-not-allowed' : ''}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: '#FFF1CA', color: COLORS.textMain }}>
                           <IconInstagram size={20} />
                         </button>
-                        <button onClick={() => socialLinks.tiktok && window.open(socialLinks.tiktok, '_blank')} className={`w-11 h-11 backdrop-blur-sm rounded-[16px] flex items-center justify-center shadow-sm border transition-transform hover:scale-105 active:scale-95 ${!socialLinks.tiktok ? 'opacity-30 cursor-not-allowed' : ''}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: COLORS.cardBorder, color: COLORS.white }}>
+                        <button onClick={() => socialLinks.tiktok && window.open(socialLinks.tiktok, '_blank')} className={`w-11 h-11 backdrop-blur-sm rounded-[16px] flex items-center justify-center shadow-sm border transition-transform hover:scale-105 active:scale-95 ${!socialLinks.tiktok ? 'opacity-30 cursor-not-allowed' : ''}`} style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderColor: '#FFF1CA', color: COLORS.textMain }}>
                           <IconTikTok size={20} />
                         </button>
                       </div>
@@ -716,12 +842,12 @@
 
                   <div className="flex items-center justify-between mb-2.5 ml-1">
                     <h2 className="text-[10px] font-black italic uppercase tracking-[0.3em] opacity-60" style={{ color: COLORS.white }}>Today's Task</h2>
-                    <div className="h-[1px] flex-1 mx-3" style={{ backgroundImage: `linear-gradient(to right, ${COLORS.white}66, transparent)` }}></div>
+                    <div className="h-[1px] flex-1 mx-3" style={{ backgroundColor: `${COLORS.white}66` }}></div>
                   </div>
                   <div className="space-y-1">
-                    {todayTasks.length > 0 ? todayTasks.map(t => <TaskCard key={t.id} task={t} isAdmin={isAdmin} onEdit={handleEditTask} onToggleDoing={toggleDoing} onToggleStatus={toggleStatus} />) : (
+                    {todayTasks.length > 0 ? todayTasks.map(t => <TaskCard key={t.id} task={t} isAdmin={isAdmin} onEdit={handleEditTask} onChangeStatus={changeTaskStatus} />) : (
                       <div className="text-center py-10 rounded-[28px] border-2 border-dashed" style={{ backgroundColor: `${COLORS.cardWhite}4d`, borderColor: `${COLORS.cardBorder}80` }}>
-                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-60" style={{ color: COLORS.white }}>Sky is clear ✨</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-60" style={{ color: COLORS.textMain }}>Sky is clear ✨</p>
                       </div>
                     )}
                   </div>
@@ -730,14 +856,14 @@
                 /* ===== VIEW: All Tasks ===== */
                 <div className="animate-fadeIn">
                   <div className="relative mb-4">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-70" style={{ color: COLORS.white }}><IconSearch size={16} /></div>
-                    <input type="text" placeholder="ค้นหาคิวงาน..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full rounded-[22px] py-3 pl-10 pr-4 outline-none text-xs shadow-lg transition-all backdrop-blur-sm placeholder:text-[#9C9874]" style={{ backgroundColor: `${COLORS.searchInputBg}cc`, borderWidth: '2px', borderColor: COLORS.cardBorder, color: COLORS.white, shadowColor: 'rgba(59,36,24,0.5)' }} />
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-70" style={{ color: COLORS.textMain }}><IconSearch size={16} /></div>
+                    <input type="text" placeholder="ค้นหาคิวงาน..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full rounded-[22px] py-3 pl-10 pr-4 outline-none text-xs font-bold shadow-lg transition-all backdrop-blur-sm placeholder:text-[#FF9BC9]" style={{ backgroundColor: `${COLORS.cardWhite}cc`, borderWidth: '1px', borderColor: '#FFF1CA', color: COLORS.textMain, shadowColor: 'rgba(243,82,141,0.5)' }} />
                   </div>
                   
                   <div className="flex gap-2 mb-3 p-1.5 rounded-full backdrop-blur-md shadow-sm" style={{ backgroundColor: `${COLORS.filterBarBg}80`, borderWidth: '3px', borderColor: COLORS.cardBorder }}>
-                      <button onClick={() => setFilterType('all')} className={`flex-1 text-[9px] font-black py-2 rounded-full transition-all tracking-wider`} style={{ color: filterType === 'all' ? COLORS.white : COLORS.blue, backgroundColor: filterType === 'all' ? COLORS.cardBg : 'transparent' }}>ทั้งหมด</button>
-                      <button onClick={() => setFilterType('pending')} className={`flex-1 text-[9px] font-black py-2 rounded-full transition-all tracking-wider`} style={{ color: filterType === 'pending' ? COLORS.white : COLORS.blue, backgroundColor: filterType === 'pending' ? COLORS.cardBg : 'transparent' }}>ยังไม่ได้เริ่ม</button>
-                      <button onClick={() => setFilterType('done')} className={`flex-1 text-[9px] font-black py-2 rounded-full transition-all tracking-wider`} style={{ color: filterType === 'done' ? COLORS.white : COLORS.blue, backgroundColor: filterType === 'done' ? COLORS.cardBg : 'transparent' }}>เสร็จแล้ว</button>
+                      <button onClick={() => setFilterType('all')} className={`flex-1 text-[9px] font-black py-2 rounded-full transition-all tracking-wider`} style={{ color: filterType === 'all' ? COLORS.textMain : COLORS.white, backgroundColor: filterType === 'all' ? COLORS.cardBg : 'transparent' }}>ทั้งหมด</button>
+                      <button onClick={() => setFilterType('pending')} className={`flex-1 text-[9px] font-black py-2 rounded-full transition-all tracking-wider`} style={{ color: filterType === 'pending' ? COLORS.textMain : COLORS.white, backgroundColor: filterType === 'pending' ? COLORS.cardBg : 'transparent' }}>ยังไม่ได้เริ่ม</button>
+                      <button onClick={() => setFilterType('done')} className={`flex-1 text-[9px] font-black py-2 rounded-full transition-all tracking-wider`} style={{ color: filterType === 'done' ? COLORS.textMain : COLORS.white, backgroundColor: filterType === 'done' ? COLORS.cardBg : 'transparent' }}>เสร็จแล้ว</button>
                   </div>
 
                   <div className="flex justify-end mb-4 pr-1">
@@ -745,7 +871,7 @@
                       const newView = !isCalendarView;
                       setIsCalendarView(newView); 
                       if(newView) setFilterType('all'); 
-                    }} className="flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-md rounded-full shadow-md text-[9px] font-black uppercase tracking-widest transition-all active:scale-95" style={{ color: COLORS.white, backgroundColor: `${COLORS.buttonBg}cc`, borderWidth: '2px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(59,36,24,0.3)' }}>
+                    }} className="flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-md rounded-full shadow-md text-[9px] font-black uppercase tracking-widest transition-all active:scale-95" style={{ color: COLORS.white, backgroundColor: `${COLORS.buttonBg}cc`, borderWidth: '2px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(243,82,141,0.3)' }}>
                       {isCalendarView ? <><IconList size={14} /> รูปแบบรายการ</> : <><IconCalendar size={14} /> รูปแบบปฏิทิน</>}
                     </button>
                   </div>
@@ -753,9 +879,9 @@
                   {isCalendarView && <CalendarView currentMonth={currentMonth} setCurrentMonth={setCurrentMonth} selectedDate={selectedDate} setSelectedDate={setSelectedDate} today={today} tasks={tasks} />}
 
                   <div className="space-y-1">
-                    {displayedTasks.length > 0 ? displayedTasks.map(t => <TaskCard key={t.id} task={t} isAdmin={isAdmin} onEdit={handleEditTask} onToggleDoing={toggleDoing} onToggleStatus={toggleStatus} />) : (
+                    {displayedTasks.length > 0 ? displayedTasks.map(t => <TaskCard key={t.id} task={t} isAdmin={isAdmin} onEdit={handleEditTask} onChangeStatus={changeTaskStatus} />) : (
                       <div className="text-center py-10 rounded-[28px] border-[4px] border-dashed shadow-sm mt-4" style={{ backgroundColor: `${COLORS.cardWhite}4d`, borderColor: COLORS.cardBorder }}>
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60" style={{ color: COLORS.white }}>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60" style={{ color: COLORS.textMain }}>
                           {isCalendarView ? "วันนี้คิวว่าง ✨" : "No records found ✨"}
                         </p>
                       </div>
@@ -767,7 +893,7 @@
 
             {/* ===== Bottom Navigation Bar ===== */}
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[210px] z-50">
-              <div className="backdrop-blur-xl rounded-full h-14 shadow-2xl flex items-center justify-between px-6 relative" style={{ backgroundColor: `${COLORS.navBarBg}e6`, borderWidth: '1px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(59,36,24,0.6)' }}>
+              <div className="backdrop-blur-xl rounded-full h-14 shadow-2xl flex items-center justify-between px-6 relative" style={{ backgroundColor: `${COLORS.navBarBg}e6`, borderWidth: '1px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(243,82,141,0.6)' }}>
                   <button onClick={() => setView('dashboard')} className={`p-1 transition-all ${view === 'dashboard' ? 'scale-110' : 'opacity-60'}`} style={{ color: view === 'dashboard' ? COLORS.white : COLORS.blue }}>
                     <IconHome size={22} />
                   </button>
@@ -777,7 +903,7 @@
                   </button>
                   {isAdmin && (
                     <div className="absolute left-1/2 -translate-x-1/2 -top-6">
-                      <button onClick={() => { setEditingTask(null); setShowModal(true); }} className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-transform" style={{ backgroundColor: COLORS.bg, color: COLORS.white, borderWidth: '4px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(59,36,24,0.6)' }}>
+                      <button onClick={() => { setEditingTask(null); setShowModal(true); }} className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-transform" style={{ backgroundColor: '#FFF1CA', color: COLORS.textMain, borderWidth: '4px', borderColor: COLORS.cardBorder, shadowColor: 'rgba(243,82,141,0.6)' }}>
                         <IconPlus size={24} />
                       </button>
                     </div>
@@ -789,65 +915,71 @@
                 🪟 MODAL: เพิ่ม/แก้ไขงาน
                 ========================================== */}
             {showModal && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(59,36,24,0.8)' }}>
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(243,82,141,0.8)' }}>
                 <form onSubmit={handleSaveTask} className="backdrop-blur-xl w-full max-w-xs rounded-[35px] p-6 shadow-2xl animate-slideUp" style={{ backgroundColor: `${COLORS.modalBg}f2`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
-                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: COLORS.white }}>{editingTask ? 'แก้ไขคิวงาน ✨' : 'เพิ่มคิวใหม่ ✨'}</h3>
+                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: '#fff9e8' }}>{editingTask ? 'แก้ไขคิวงาน ✨' : 'เพิ่มคิวใหม่ ✨'}</h3>
                    <div className="space-y-2 relative">
                      {isSaving && (
                         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl backdrop-blur-sm" style={{ backgroundColor: `${COLORS.modalBg}e6` }}>
-                           <IconLoader size={32} className="animate-spin-slow" style={{ color: COLORS.white }} />
-                           <span className="text-[10px] font-black mt-2" style={{ color: COLORS.white }}>กำลังบันทึก...</span>
+                           <IconLoader size={32} className="animate-spin-slow" style={{ color: '#fff9e8' }} />
+                           <span className="text-[10px] font-black mt-2" style={{ color: '#fff9e8' }}>กำลังบันทึก...</span>
                         </div>
                      )}
                      
                      <div className="flex justify-end mb-1">
                        <label className="flex items-center cursor-pointer gap-2 px-3 py-1.5 rounded-full shadow-sm border" style={{ backgroundColor: COLORS.buttonBg, borderColor: COLORS.cardBorder }}>
-                         <span className="text-[10px] font-bold" style={{ color: COLORS.white }}>คิวด่วน 🔥</span>
+                         <span className="text-[10px] font-bold" style={{ color: '#fff9e8' }}>คิวด่วน 🔥</span>
                          <div className="relative">
                            <input type="checkbox" name="priority" value="urgent" defaultChecked={editingTask?.priority === 'urgent'} className="sr-only peer" />
-                           <div className={`w-8 h-4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:border after:rounded-full after:h-3 after:w-3 after:transition-all`} style={{ backgroundColor: '#9C9874', borderColor: '#3B2418' }}></div>
+                           <div className={`w-8 h-4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:border after:rounded-full after:h-3 after:w-3 after:transition-all`} style={{ backgroundColor: '#FFD7E3', borderColor: '#F3528D' }}></div>
                            <style>{`
-                              .peer:checked + div { background-color: #7A301A !important; }
-                              .peer:checked + div::after { border-color: #3B2418 !important; background-color: #D9C89C !important; }
-                              .peer + div::after { border-color: #3B2418 !important; background-color: #D9C89C !important; }
+                              .peer:checked + div { background-color: #FF9BC9 !important; }
+                              .peer:checked + div::after { border-color: #F3528D !important; background-color: #FFF1CA !important; }
+                              .peer + div::after { border-color: #F3528D !important; background-color: #FFF1CA !important; }
                            `}</style>
                          </div>
                        </label>
                      </div>
 
-                     <input name="client" required defaultValue={editingTask?.client || ''} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="ชื่อลูกค้า" />
-                     <style>{`input::placeholder, textarea::placeholder { color: #9C9874 !important; }`}</style>
+                     <input name="client" required defaultValue={editingTask?.client || ''} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="ชื่อลูกค้า" />
+                     <style>{`input::placeholder, textarea::placeholder { color: #FFD7E3 !important; }`}</style>
                      
                      <div className="flex flex-col gap-2">
-                        <input list="taskTypesList" name="type" required defaultValue={editingTask?.type || ''} className="w-full p-3.5 rounded-2xl font-black text-[10px] outline-none border shadow-sm" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="ประเภทงาน" />
+                        <input list="taskTypesList" name="type" required defaultValue={editingTask?.type || ''} className="w-full p-3.5 rounded-2xl font-black text-[10px] outline-none border shadow-sm" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="ประเภทงาน" />
                         <datalist id="taskTypesList">
                           {taskTypes.map(type => <option key={type} value={type} />)}
                         </datalist>
 
-                        <input list="channelsList" name="channel" required defaultValue={editingTask?.channel || ''} className="w-full p-3.5 rounded-2xl font-black text-[10px] outline-none border shadow-sm" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="ช่องทาง" />
+                        <input list="channelsList" name="channel" required defaultValue={editingTask?.channel || ''} className="w-full p-3.5 rounded-2xl font-black text-[10px] outline-none border shadow-sm" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="ช่องทาง" />
                         <datalist id="channelsList">
                           {channels.map(ch => <option key={ch} value={ch} />)}
                         </datalist>
+                        
+                        <select name="status" defaultValue={editingTask?.status || 'todo'} className="w-full p-3.5 rounded-2xl font-black text-[10px] outline-none border shadow-sm appearance-none bg-no-repeat" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF9BC9' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundPosition: 'right 1rem center', backgroundSize: '1em' }}>
+                          {STATUS_STEPS.map(step => (
+                            <option key={step.id} value={step.id}>{step.label}</option>
+                          ))}
+                        </select>
                      </div>
 
-                     <textarea name="details" rows="2" defaultValue={editingTask?.details || ''} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all resize-none" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
+                     <textarea name="details" rows="2" defaultValue={editingTask?.details || ''} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all resize-none" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
                      
                      <div className="flex items-center justify-between p-1.5 pl-4 rounded-2xl border transition-all shadow-sm mt-1" style={{ backgroundColor: COLORS.buttonBg, borderColor: COLORS.cardBorder }}>
-                       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-black" style={{ color: COLORS.white }}>
+                       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-black" style={{ color: '#fff9e8' }}>
                          <IconCalendar size={12} className="group-hover:animate-bounce-slow transition-transform" /><span>Deadline</span>
                        </div>
-                       <input name="deadline" type="date" required defaultValue={editingTask?.deadline || nextQueueDate} className="w-32 p-2.5 rounded-xl border outline-none text-[10px] font-black shadow-sm transition-all cursor-pointer active:scale-95" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} />
+                       <input name="deadline" type="date" required defaultValue={editingTask?.deadline || nextQueueDate} className="w-32 p-2.5 rounded-xl border outline-none text-[10px] font-black shadow-sm transition-all cursor-pointer active:scale-95" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} />
                      </div>
                      
                      <div className="flex items-center gap-2 mt-3">
-                       <button type="submit" className="flex-1 py-3.5 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all disabled:opacity-50" style={{ backgroundColor: COLORS.orange, color: COLORS.white }}>บันทึกคิวงาน</button>
+                       <button type="submit" className="flex-1 py-3.5 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all disabled:opacity-50" style={{ backgroundColor: '#FFF1CA', color: '#FF9BC9' }}>บันทึกคิวงาน</button>
                        {editingTask && (
-                         <button type="button" onClick={() => setTaskToDelete(editingTask.id)} className="w-12 h-[44px] flex items-center justify-center rounded-2xl active:scale-95 transition-all shadow-sm border" style={{ backgroundColor: COLORS.bg, color: COLORS.white, borderColor: COLORS.cardBorder }} title="ลบคิวงาน">
+                         <button type="button" onClick={() => setTaskToDelete(editingTask.id)} className="w-12 h-[44px] flex items-center justify-center rounded-2xl active:scale-95 transition-all shadow-sm border" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} title="ลบคิวงาน">
                            <IconTrash size={18} />
                          </button>
                        )}
                      </div>
-                     <button type="button" onClick={() => { setShowModal(false); setEditingTask(null); }} className="w-full text-[9px] font-bold mt-2 uppercase tracking-widest" style={{ color: COLORS.bg }}>Close</button>
+                     <button type="button" onClick={() => { setShowModal(false); setEditingTask(null); }} className="w-full text-[9px] font-bold mt-2 uppercase tracking-widest" style={{ color: '#fff9e8' }}>Close</button>
                    </div>
                 </form>
               </div>
@@ -857,24 +989,24 @@
                 🔗 MODAL: ตั้งค่า Social Links (เฉพาะ Admin)
                 ========================================== */}
             {showSocialModal && (
-              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(59,36,24,0.8)' }}>
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(243,82,141,0.8)' }}>
                 <form onSubmit={handleSaveSocialLinks} className="backdrop-blur-xl w-full max-w-xs rounded-[35px] p-6 shadow-2xl animate-slideUp" style={{ backgroundColor: `${COLORS.modalBg}f2`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
-                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: COLORS.white }}>ตั้งค่า Social Links</h3>
+                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: '#fff9e8' }}>ตั้งค่า Social Links</h3>
                    <div className="space-y-3">
                      <div className="flex items-center gap-2">
-                       <IconFacebook size={24} className="text-[#3B2418]" />
-                       <input type="url" value={tempSocialLinks.facebook} onChange={(e) => setTempSocialLinks({...tempSocialLinks, facebook: e.target.value})} className="flex-1 p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="Facebook URL..." />
+                       <IconFacebook size={24} className="text-[#fff9e8]" />
+                       <input type="url" value={tempSocialLinks.facebook} onChange={(e) => setTempSocialLinks({...tempSocialLinks, facebook: e.target.value})} className="flex-1 p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="Facebook URL..." />
                      </div>
                      <div className="flex items-center gap-2">
-                       <IconInstagram size={24} className="text-[#3B2418]" />
-                       <input type="url" value={tempSocialLinks.instagram} onChange={(e) => setTempSocialLinks({...tempSocialLinks, instagram: e.target.value})} className="flex-1 p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="Instagram URL..." />
+                       <IconInstagram size={24} className="text-[#fff9e8]" />
+                       <input type="url" value={tempSocialLinks.instagram} onChange={(e) => setTempSocialLinks({...tempSocialLinks, instagram: e.target.value})} className="flex-1 p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="Instagram URL..." />
                      </div>
                      <div className="flex items-center gap-2">
-                       <IconTikTok size={24} className="text-[#3B2418]" />
-                       <input type="url" value={tempSocialLinks.tiktok} onChange={(e) => setTempSocialLinks({...tempSocialLinks, tiktok: e.target.value})} className="flex-1 p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="TikTok URL..." />
+                       <IconTikTok size={24} className="text-[#fff9e8]" />
+                       <input type="url" value={tempSocialLinks.tiktok} onChange={(e) => setTempSocialLinks({...tempSocialLinks, tiktok: e.target.value})} className="flex-1 p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="TikTok URL..." />
                      </div>
-                     <button type="submit" className="w-full py-3.5 rounded-2xl font-black text-xs mt-4 shadow-lg active:scale-95 transition-all" style={{ backgroundColor: COLORS.orange, color: COLORS.white }}>Save Links</button>
-                     <button type="button" onClick={() => setShowSocialModal(false)} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: COLORS.bg }}>Close</button>
+                     <button type="submit" className="w-full py-3.5 rounded-2xl font-black text-xs mt-4 shadow-lg active:scale-95 transition-all" style={{ backgroundColor: '#FFF1CA', color: '#FF9BC9' }}>Save Links</button>
+                     <button type="button" onClick={() => setShowSocialModal(false)} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: '#fff9e8' }}>Close</button>
                    </div>
                 </form>
               </div>
@@ -884,16 +1016,16 @@
                 🔐 MODAL: Login Admin
                 ========================================== */}
             {showAuthModal && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(59,36,24,0.8)' }}>
+              <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(243,82,141,0.8)' }}>
                 <form onSubmit={handleAdminLogin} className="backdrop-blur-xl w-full max-w-xs rounded-[35px] p-6 shadow-2xl animate-slideUp" style={{ backgroundColor: `${COLORS.modalBg}f2`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
-                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: COLORS.white }}>เข้าสู่ระบบ Admin</h3>
+                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: '#fff9e8' }}>เข้าสู่ระบบ Admin</h3>
                    <div className="space-y-2">
-                     <input type="password" required value={password} onChange={(e) => { setPassword(e.target.value); setAuthError(false); }} className={`w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all text-center tracking-widest`} style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: authError ? COLORS.orange : COLORS.cardBorder }} placeholder="ใส่รหัสผ่าน" disabled={isVerifyingAuth} />
-                     {authError && <p className="text-[9px] text-center font-bold" style={{ color: COLORS.bg, backgroundColor: COLORS.white, padding: '4px', borderRadius: '4px' }}>รหัสผ่านไม่ถูกต้อง!</p>}
-                     <button type="submit" disabled={isVerifyingAuth} className="w-full h-11 rounded-2xl font-black text-xs mt-3 shadow-lg flex items-center justify-center active:scale-95 transition-all disabled:opacity-70" style={{ backgroundColor: COLORS.orange, color: COLORS.white }}>
+                     <input type="password" required value={password} onChange={(e) => { setPassword(e.target.value); setAuthError(false); }} className={`w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all text-center tracking-widest`} style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: authError ? COLORS.orange : COLORS.cardBorder }} placeholder="ใส่รหัสผ่าน" disabled={isVerifyingAuth} />
+                     {authError && <p className="text-[9px] text-center font-bold" style={{ color: '#FF9BC9', backgroundColor: COLORS.white, padding: '4px', borderRadius: '4px' }}>รหัสผ่านไม่ถูกต้อง!</p>}
+                     <button type="submit" disabled={isVerifyingAuth} className="w-full h-11 rounded-2xl font-black text-xs mt-3 shadow-lg flex items-center justify-center active:scale-95 transition-all disabled:opacity-70" style={{ backgroundColor: '#FFF1CA', color: '#FF9BC9' }}>
                         {isVerifyingAuth ? <IconLoader size={16} className="animate-spin-slow" /> : 'Login'}
                      </button>
-                     <button type="button" onClick={() => { setShowAuthModal(false); setAuthError(false); setPassword(''); }} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: COLORS.bg }} disabled={isVerifyingAuth}>Close</button>
+                     <button type="button" onClick={() => { setShowAuthModal(false); setAuthError(false); setPassword(''); }} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: '#fff9e8' }} disabled={isVerifyingAuth}>Close</button>
                    </div>
                 </form>
               </div>
@@ -903,14 +1035,14 @@
                 🖼️ MODAL: เปลี่ยนรูปโปรไฟล์
                 ========================================== */}
             {showImageModal && (
-              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(59,36,24,0.8)' }}>
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(243,82,141,0.8)' }}>
                 <form onSubmit={(e) => { 
                     e.preventDefault(); 
                     if (tempImageUrl) { 
                         let finalUrl = tempImageUrl;
                         const match = finalUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || finalUrl.match(/id=([a-zA-Z0-9_-]+)/) || finalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
                         if (match && match[1]) {
-                            finalUrl = `https://lh3.googleusercontent.com/d/${match[1]}`;
+                            finalUrl = `https://lh3.googleusercontent.com/d/$${match[1]}`;
                         }
                         setProfileImage(finalUrl); 
                         fetchAPI({ action: 'saveProfileImage', imageUrl: finalUrl });
@@ -918,11 +1050,11 @@
                     setShowImageModal(false); 
                     setTempImageUrl(''); 
                 }} className="backdrop-blur-xl w-full max-w-xs rounded-[35px] p-6 shadow-2xl animate-slideUp" style={{ backgroundColor: `${COLORS.modalBg}f2`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
-                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: COLORS.white }}>เปลี่ยนรูปโปรไฟล์ 🐻</h3>
+                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: '#fff9e8' }}>เปลี่ยนรูปโปรไฟล์ 🐻</h3>
                    <div className="space-y-2">
-                     <input type="url" required value={tempImageUrl} onChange={(e) => setTempImageUrl(e.target.value)} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all text-center" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="วางลิงก์รูปภาพ Google Drive ที่นี่..." />
-                     <button type="submit" className="w-full py-3.5 rounded-2xl font-black text-xs mt-3 shadow-lg active:scale-95 transition-all" style={{ backgroundColor: COLORS.orange, color: COLORS.white }}>Save Image</button>
-                     <button type="button" onClick={() => { setShowImageModal(false); setTempImageUrl(''); }} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: COLORS.bg }}>Close</button>
+                     <input type="url" required value={tempImageUrl} onChange={(e) => setTempImageUrl(e.target.value)} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all text-center" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="วางลิงก์รูปภาพ Google Drive ที่นี่..." />
+                     <button type="submit" className="w-full py-3.5 rounded-2xl font-black text-xs mt-3 shadow-lg active:scale-95 transition-all" style={{ backgroundColor: '#FFF1CA', color: '#FF9BC9' }}>Save Image</button>
+                     <button type="button" onClick={() => { setShowImageModal(false); setTempImageUrl(''); }} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: '#fff9e8' }}>Close</button>
                    </div>
                 </form>
               </div>
@@ -932,14 +1064,14 @@
                 🖼️ MODAL: เปลี่ยนแบนเนอร์ร้าน
                 ========================================== */}
             {showBannerModal && (
-              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(59,36,24,0.8)' }}>
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(243,82,141,0.8)' }}>
                 <form onSubmit={(e) => { 
                     e.preventDefault(); 
                     if (tempBannerUrl) { 
                         let finalUrl = tempBannerUrl;
                         const match = finalUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || finalUrl.match(/id=([a-zA-Z0-9_-]+)/) || finalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
                         if (match && match[1]) {
-                            finalUrl = `https://lh3.googleusercontent.com/d/${match[1]}`;
+                            finalUrl = `https://lh3.googleusercontent.com/d/$${match[1]}`;
                         }
                         setBannerImage(finalUrl); 
                         toggleBannerVisibility(true);
@@ -948,11 +1080,11 @@
                     setShowBannerModal(false); 
                     setTempBannerUrl(''); 
                 }} className="backdrop-blur-xl w-full max-w-xs rounded-[35px] p-6 shadow-2xl animate-slideUp" style={{ backgroundColor: `${COLORS.modalBg}f2`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
-                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: COLORS.white }}>เปลี่ยนแบนเนอร์</h3>
+                   <h3 className="text-sm font-black mb-4 text-center" style={{ color: '#fff9e8' }}>เปลี่ยนแบนเนอร์</h3>
                    <div className="space-y-2">
-                     <input type="url" required value={tempBannerUrl} onChange={(e) => setTempBannerUrl(e.target.value)} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all text-center" style={{ backgroundColor: COLORS.cardInner, color: COLORS.white, borderColor: COLORS.cardBorder }} placeholder="วางลิงก์รูปภาพ Google Drive..." />
-                     <button type="submit" className="w-full py-3.5 rounded-2xl font-black text-xs mt-3 shadow-lg active:scale-95 transition-all" style={{ backgroundColor: COLORS.orange, color: COLORS.white }}>Save Banner</button>
-                     <button type="button" onClick={() => { setShowBannerModal(false); setTempBannerUrl(''); }} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: COLORS.bg }}>Close</button>
+                     <input type="url" required value={tempBannerUrl} onChange={(e) => setTempBannerUrl(e.target.value)} className="w-full p-3.5 rounded-2xl border outline-none text-[11px] shadow-sm transition-all text-center" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }} placeholder="วางลิงก์รูปภาพ Google Drive..." />
+                     <button type="submit" className="w-full py-3.5 rounded-2xl font-black text-xs mt-3 shadow-lg active:scale-95 transition-all" style={{ backgroundColor: '#FFF1CA', color: '#FF9BC9' }}>Save Banner</button>
+                     <button type="button" onClick={() => { setShowBannerModal(false); setTempBannerUrl(''); }} className="w-full text-[9px] font-bold mt-1 uppercase tracking-widest" style={{ color: '#fff9e8' }}>Close</button>
                    </div>
                 </form>
               </div>
@@ -962,17 +1094,17 @@
                 🗑️ MODAL: ยืนยันการลบงาน
                 ========================================== */}
             {taskToDelete && (
-              <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(59,36,24,0.8)' }}>
+              <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-[2px] animate-fadeIn" style={{ backgroundColor: 'rgba(243,82,141,0.8)' }}>
                 <div className="backdrop-blur-xl w-full max-w-[260px] rounded-[30px] p-6 shadow-2xl animate-slideUp text-center" style={{ backgroundColor: `${COLORS.modalBg}f2`, borderWidth: '1px', borderColor: COLORS.cardBorder }}>
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border" style={{ backgroundColor: COLORS.bg, color: COLORS.white, borderColor: COLORS.cardBorder }}>
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }}>
                      <IconTrash size={26} />
                   </div>
-                  <h3 className="text-[14px] font-black mb-1" style={{ color: COLORS.white }}>ยืนยันการลบ?</h3>
-                  <p className="text-[10px] font-bold mb-5" style={{ color: COLORS.blue }}>คุณต้องการลบคิวงานนี้ใช่หรือไม่<br/>(ไม่สามารถกู้คืนได้)</p>
+                  <h3 className="text-[14px] font-black mb-1" style={{ color: '#fff9e8' }}>ยืนยันการลบ?</h3>
+                  <p className="text-[10px] font-bold mb-5" style={{ color: '#fff9e8' }}>คุณต้องการลบคิวงานนี้ใช่หรือไม่<br/>(ไม่สามารถกู้คืนได้)</p>
                   
                   <div className="flex gap-2">
-                    <button onClick={() => setTaskToDelete(null)} className="flex-1 py-3 rounded-2xl font-black text-[10px] active:scale-95 transition-all shadow-sm border" style={{ backgroundColor: COLORS.bg, color: COLORS.white, borderColor: COLORS.cardBorder }}>ยกเลิก</button>
-                    <button onClick={executeDeleteTask} className="flex-1 py-3 rounded-2xl font-black text-[10px] active:scale-95 transition-all shadow-sm" style={{ backgroundColor: COLORS.orange, color: COLORS.white }}>ลบข้อมูล</button>
+                    <button onClick={() => setTaskToDelete(null)} className="flex-1 py-3 rounded-2xl font-black text-[10px] active:scale-95 transition-all shadow-sm border" style={{ backgroundColor: '#FFFFFF', color: '#FF9BC9', borderColor: COLORS.cardBorder }}>ยกเลิก</button>
+                    <button onClick={executeDeleteTask} className="flex-1 py-3 rounded-2xl font-black text-[10px] active:scale-95 transition-all shadow-sm" style={{ backgroundColor: '#FFF1CA', color: '#FF9BC9' }}>ลบข้อมูล</button>
                   </div>
                 </div>
               </div>
@@ -989,6 +1121,41 @@
               100% { transform: translateY(-300px) translateX(-20px) scale(1.5); opacity: 0; }
             }
             .animate-steam { animation: steam 10s ease-in-out infinite; }
+
+            /* ✨ อนิเมชั่นกระพริบวิบวับแบบขยายร่างขึ้นลง */
+            @keyframes twinkle {
+                0%, 100% { opacity: 0.2; transform: scale(0.6); }
+                50% { opacity: 1; transform: scale(1.2); }
+            }
+            .animate-twinkle { animation: twinkle 1.5s ease-in-out infinite; }
+
+            /* 👆 อนิเมชั่นตอบสนองเมื่อคลิก */
+            @keyframes clickRipple {
+                0% { opacity: 1; transform: translate(-50%, -50%) scale(0); border-width: 4px; }
+                100% { opacity: 0; transform: translate(-50%, -50%) scale(4); border-width: 1px; }
+            }
+            .animate-clickRipple { animation: clickRipple 0.5s ease-out forwards; }
+
+            /* 💧 อนิเมชั่นน้ำไหลระยิบระยับในหลอด Progress */
+            .water-effect {
+                background-image: 
+                    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 1px, transparent 2px),
+                    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.6) 1.5px, transparent 2.5px),
+                    linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+                background-size: 12px 12px, 16px 16px, 200% 100%;
+                animation: water-sparkle-move 1.5s linear infinite;
+            }
+            @keyframes water-sparkle-move {
+                0% { background-position: 0 0, 0 0, 200% 0; }
+                100% { background-position: -12px -12px, -16px -16px, -200% 0; }
+            }
+
+            /* 🐇 อนิเมชั่นกระต่ายวิ่งและสลับฝั่งหันไปทางขวา (ปรับให้ช้าลงเป็น 1.5s) */
+            @keyframes bunny-run {
+                0%, 100% { transform: scaleX(-1) translateY(-2px) rotate(-5deg); }
+                50% { transform: scaleX(-1) translateY(2px) rotate(5deg); }
+            }
+            .animate-bunny-run { animation: bunny-run 1.5s ease-in-out infinite; }
 
             @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(25px, -15px); } }
             @keyframes float-reverse { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-25px, 15px); } }
@@ -1023,4 +1190,3 @@
   </script>
 </body>
 </html>
-
