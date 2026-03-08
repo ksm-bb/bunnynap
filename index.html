@@ -309,7 +309,7 @@
           }}
           >
           {isWorking && (
-             <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[22px]">
+             <div className="absolute inset-0 pointer-events-none z-50">
                <div className="absolute -bottom-2 -left-3 text-[14px] animate-float-particle-1 drop-shadow-sm">🧸</div>
                <div className="absolute top-[30%] -left-4 text-[10px] animate-float-particle-3 drop-shadow-sm" style={{ animationDelay: '1.5s' }}>🧸</div>
                <div className="absolute -bottom-2 -right-3 text-[14px] animate-float-particle-2 drop-shadow-sm" style={{ animationDelay: '0.5s' }}>🧸</div>
@@ -356,14 +356,14 @@
                           </div>
                       </div>
                       
-                      {/* 🐰 เลเยอร์พิเศษสำหรับหัวกระต่ายและดาววิงก์วาดใหม่ (ไม่โดนขอบหลอดตัด ขนาด 24px) */}
+                      {/* 🐰 เลเยอร์พิเศษสำหรับหัวกระต่ายและดาว (ไม่โดนขอบหลอดตัด ขนาด 24px) */}
                       <div className="absolute top-1/2 -translate-y-1/2 transition-all duration-700 ease-out z-50 flex items-center justify-center pointer-events-none"
                            style={{ left: `calc(${Math.max(8, currentStep.percent)}% - 12px)` }}>
                           <div className="relative flex items-center justify-center">
-                              {/* ✨ ดาววิงก์แบบวาด SVG (นำกลับมาตามรีเควสต์) */}
-                              <SparkleSvg size="12" className="absolute -top-3 -left-3 animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.1s' }} />
-                              <SparkleSvg size="8" className="absolute top-4 -right-1 animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.4s' }} />
-                              <SparkleSvg size="10" className="absolute -top-1 -right-4 animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.7s' }} />
+                              {/* ✨ ดาวอิโมจิกระพริบเล็กๆ */}
+                              <span className="absolute -top-3 -left-2 text-[10px] animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.1s' }}>✨</span>
+                              <span className="absolute top-4 -right-1 text-[8px] animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.4s' }}>✨</span>
+                              <span className="absolute -top-1 -right-4 text-[12px] animate-twinkle drop-shadow-sm" style={{ animationDelay: '0.7s' }}>✨</span>
                               
                               {/* 🐰 หัวกระต่ายขยับดุ๊กดิ๊กเบาๆ ขนาด 24px พอดี */}
                               <div className="animate-bunny-run flex items-center justify-center drop-shadow-md" style={{ width: '24px', height: '24px', fontSize: '24px', lineHeight: '1' }}>
@@ -502,8 +502,7 @@
       // 👆 ตัวแปรสำหรับ Interactive Click Trail
       const [clickTrails, setClickTrails] = useState([]);
 
-      // ⚠️⚠️⚠️ อย่าลืมเปลี่ยนเป็นลิงก์ Web App ของคุณ ⚠️⚠️⚠️
-      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzsVe5DeqGr2vtYlv30DrbyCY2C78L494yA9gsfiSi1rnMRrBabK7MiHhdv1bdlp65DTg/exec";
+      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwHOGkkZ3HuKr_7II968y0zktwrHNjOvzDzHcspMMHIFRySbCRZ5lfTcSJrWxstURey2Q/exec";
 
       const fetchAPI = async (payload) => {
         try {
